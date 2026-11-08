@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #5645d4;
+    --color-primary-pressed: #4534b3;
+    --color-brand-navy: #0a1530;
+    --color-canvas: #ffffff;
+    --color-surface: #f6f5f4;
+    --color-hairline: #e5e3df;
+    --color-ink: #1a1a1a;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    font-family: "Notion Sans", Inter, -apple-system, system-ui, 'Segoe UI', Helvetica, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+}

@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { BudgetProvider } from './context/BudgetContext';
-import { PromoBanner } from './components/dashboard/PromoBanner';
 import { Navbar } from './components/dashboard/Navbar';
-import { HeroBand } from './components/dashboard/HeroBand';
+import { BudgetCalculator } from './components/dashboard/BudgetCalculator';
 import { QuickStats } from './components/dashboard/QuickStats';
 import { TransactionFilters } from './components/dashboard/TransactionFilters';
 import { TransactionTable } from './components/dashboard/TransactionTable';
 import { CategoryBreakdown } from './components/dashboard/CategoryBreakdown';
 import { AssistantBanner } from './components/dashboard/AssistantBanner';
 import { ComparisonSection } from './components/dashboard/ComparisonSection';
-import { LightCtaBanner } from './components/dashboard/LightCtaBanner';
-import { Footer } from './components/dashboard/Footer';
+import { DirectExpenditureCard } from './components/forms/DirectExpenditureCard';
 import { TransactionForm } from './components/forms/TransactionForm';
 import { BudgetGoalForm } from './components/forms/BudgetGoalForm';
 import { Card } from './components/common/Card';
@@ -22,83 +20,77 @@ export const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-canvas text-ink flex flex-col font-sans selection:bg-card-tint-lavender selection:text-brand-purple-800">
-      {/* 1. Promo banner */}
-      <PromoBanner />
-
-      {/* 2. Sticky Navbar */}
+      {/* 1. Clean Workspace Navigation */}
       <Navbar
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onOpenBudgetModal={() => setIsBudgetModalOpen(true)}
       />
 
-      {/* 3. Navy Hero Band with decorative dots and embedded Workspace Mockup */}
-      <HeroBand
-        onOpenAdd={() => setIsAddModalOpen(true)}
-        onOpenBudgetModal={() => setIsBudgetModalOpen(true)}
-      />
+      {/* 2. Main Budget Management Dashboard Workspace */}
+      <main className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
+        {/* Core Financial Feature 1: Budget Calculator & Runway Forecaster */}
+        <section aria-label="Budget Calculator">
+          <BudgetCalculator />
+        </section>
 
-      {/* 4. Main Responsive Content Container (1280px max-width, 32px gutters per DESIGN.md) */}
-      <main className="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8 md:space-y-12">
-        {/* Quick Stats Grid with Pastel Tints */}
-        <section id="overview" aria-label="Financial Summary Stats">
+        {/* Core Financial Feature 2: Analytics & Summary Widgets */}
+        <section aria-label="Financial Summary Stats">
           <QuickStats />
         </section>
 
-        {/* Assistant Tip Banner */}
+        {/* AI Financial Recommendations / Assistant */}
         <section aria-label="AI Assistant Recommendations">
           <AssistantBanner />
         </section>
 
-        {/* Two-Column Responsive Split: Left Ledger, Right Category Guardrails */}
-        <section id="transactions" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column (8 cols): Filters & Transaction Table */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="text-xl font-semibold text-ink">
-                  Financial Records & Cashflow
-                </h3>
-                <p className="text-sm text-steel">
-                  Monitor entries, filter across flows, and track recurring overheads.
-                </p>
+        {/* Core Financial Feature 3: Expenditure Tracking & Ledger Workspace */}
+        <section aria-label="Expenditure Tracking and Financial Records" className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+          {/* Left Column (8 cols): Interactive Expenditure Form + Transaction Records */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Quick Expenditure Capture Form */}
+            <DirectExpenditureCard />
+
+            {/* Filter Pill Tabs, Search, and Transaction Ledger Table */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-xl font-semibold text-ink">
+                    Financial Records & Transactions
+                  </h3>
+                  <p className="text-sm text-steel">
+                    Inspect categorized expenditures and recurring overheads.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-white text-xs font-semibold hover:bg-primary-pressed transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Modal Entry</span>
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-white text-xs font-semibold hover:bg-primary-pressed transition-colors cursor-pointer self-start sm:self-auto"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Transaction</span>
-              </button>
+              {/* Filter Pill Tabs and Search */}
+              <TransactionFilters />
+
+              {/* Table */}
+              <TransactionTable onOpenAdd={() => setIsAddModalOpen(true)} />
             </div>
-
-            {/* Filter Pill Tabs and Search */}
-            <TransactionFilters />
-
-            {/* Table */}
-            <TransactionTable onOpenAdd={() => setIsAddModalOpen(true)} />
           </div>
 
-          {/* Right Column (4 cols): Category Breakdown & Guardrails */}
-          <aside id="categories" className="lg:col-span-4 space-y-6">
+          {/* Right Column (4 cols): Category Budget Guardrails & Progress */}
+          <aside className="lg:col-span-4 space-y-6">
             <CategoryBreakdown onOpenBudgetModal={() => setIsBudgetModalOpen(true)} />
           </aside>
         </section>
 
-        {/* Budget vs Actual Comparison Section */}
-        <section>
+        {/* Core Financial Feature 4: Budget vs Actuals Analysis */}
+        <section aria-label="Budget vs Actual Variance Comparison">
           <ComparisonSection />
         </section>
-
-        {/* Light CTA Banner */}
-        <section>
-          <LightCtaBanner onOpenAdd={() => setIsAddModalOpen(true)} />
-        </section>
       </main>
-
-      {/* 5. Notion Multi-Column Footer */}
-      <Footer />
 
       {/* Modal: Add Transaction */}
       {isAddModalOpen && (

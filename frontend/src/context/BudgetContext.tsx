@@ -5,13 +5,19 @@ import type {
   FilterState,
   SummaryStats,
   CategorySpending,
-  ExpenseCategory
+  ExpenseCategory,
+  BudgetCalculatorConfig,
+  BudgetCalculatorMetrics
 } from '../types/budget';
 
 interface BudgetContextType {
   transactions: Transaction[];
   filteredTransactions: Transaction[];
   budgetGoals: BudgetGoal[];
+  calculatorConfig: BudgetCalculatorConfig;
+  setCalculatorConfig: React.Dispatch<React.SetStateAction<BudgetCalculatorConfig>>;
+  updateCalculatorConfig: (updates: Partial<BudgetCalculatorConfig>) => void;
+  calculatorMetrics: BudgetCalculatorMetrics;
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
@@ -118,9 +124,16 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
   },
 ];
 
+const DEFAULT_CALCULATOR_CONFIG: BudgetCalculatorConfig = {
+  incomeLimit: 4500,
+  timeframe: 'monthly',
+  savingsTargetRate: 20,
+};
+
 const STORAGE_KEYS = {
   TRANSACTIONS: 'notion_budget_transactions_v1',
   GOALS: 'notion_budget_goals_v1',
+  CALCULATOR: 'notion_budget_calculator_v1',
 };
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -141,6 +154,15 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       return stored ? JSON.parse(stored) : DEFAULT_BUDGET_GOALS;
     } catch {
       return DEFAULT_BUDGET_GOALS;
+    }
+  });
+
+  const [calculatorConfig, setCalculatorConfig] = useState<BudgetCalculatorConfig>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.CALCULATOR);
+      return stored ? JSON.parse(stored) : DEFAULT_CALCULATOR_CONFIG;
+    } catch {
+      return DEFAULT_CALCULATOR_CONFIG;
     }
   });
 
@@ -166,6 +188,18 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       console.error('Failed to save budget goals to localStorage', e);
     }
   }, [budgetGoals]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CALCULATOR, JSON.stringify(calculatorConfig));
+    } catch (e) {
+      console.error('Failed to save calculator config to localStorage', e);
+    }
+  }, [calculatorConfig]);
+
+  const updateCalculatorConfig = (updates: Partial<BudgetCalculatorConfig>) => {
+    setCalculatorConfig((prev) => ({ ...prev, ...updates }));
+  };
 
   const addTransaction = (newTxData: Omit<Transaction, 'id'>) => {
     const newTx: Transaction = {
@@ -198,6 +232,7 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const resetToDefaults = () => {
     setTransactions(INITIAL_TRANSACTIONS);
     setBudgetGoals(DEFAULT_BUDGET_GOALS);
+    setCalculatorConfig(DEFAULT_CALCULATOR_CONFIG);
     setFilters({
       type: 'all',
       searchQuery: '',
@@ -205,6 +240,43 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       sortBy: 'date-desc',
     });
   };
+
+  const calculatorMetrics = useMemo<BudgetCalculatorMetrics>(() => {
+    const { incomeLimit, timeframe, savingsTargetRate } = calculatorConfig;
+    const currentExpenses = transactions.reduce(
+      (sum, tx) => (tx.type === 'expense' ? sum + tx.amount : sum),
+      0
+    );
+
+    // Normalize monthly vs weekly calculations
+    const normalizedMonthlyIncome = timeframe === 'weekly' ? incomeLimit * 4.333 : incomeLimit;
+    const targetSavingsAmount = (normalizedMonthlyIncome * (savingsTargetRate / 100));
+    const maxSpendingAllowance = Math.max(0, normalizedMonthlyIncome - targetSavingsAmount);
+    const dailySpendingAllowance = maxSpendingAllowance / 30;
+    const weeklySpendingAllowance = maxSpendingAllowance / 4.333;
+
+    const remainingSafeSpend = maxSpendingAllowance - currentExpenses;
+    const isOverSpendingAllowance = remainingSafeSpend < 0;
+    const currentIncome = transactions.reduce(
+      (sum, tx) => (tx.type === 'income' ? sum + tx.amount : sum),
+      0
+    );
+    const actualSavingsSurplus = currentIncome - currentExpenses - targetSavingsAmount;
+
+    return {
+      incomeLimit,
+      timeframe,
+      savingsTargetRate,
+      targetSavingsAmount,
+      maxSpendingAllowance,
+      dailySpendingAllowance,
+      weeklySpendingAllowance,
+      currentExpenses,
+      remainingSafeSpend,
+      isOverSpendingAllowance,
+      actualSavingsSurplus,
+    };
+  }, [calculatorConfig, transactions]);
 
   const summaryStats = useMemo<SummaryStats>(() => {
     let totalIncome = 0;
@@ -291,6 +363,10 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     transactions,
     filteredTransactions,
     budgetGoals,
+    calculatorConfig,
+    setCalculatorConfig,
+    updateCalculatorConfig,
+    calculatorMetrics,
     filters,
     setFilters,
     addTransaction,

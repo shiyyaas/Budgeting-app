@@ -72,4 +72,21 @@ describe('BudgetContext', () => {
     const housingGoal = result.current.budgetGoals.find((g) => g.category === 'Housing');
     expect(housingGoal?.monthlyLimit).toBe(2000);
   });
+
+  it('updates calculator configuration and calculates metrics properly', () => {
+    const { result } = renderHook(() => useBudget(), { wrapper });
+
+    act(() => {
+      result.current.updateCalculatorConfig({
+        incomeLimit: 5000,
+        timeframe: 'monthly',
+        savingsTargetRate: 20,
+      });
+    });
+
+    expect(result.current.calculatorConfig.incomeLimit).toBe(5000);
+    expect(result.current.calculatorMetrics.targetSavingsAmount).toBe(1000);
+    expect(result.current.calculatorMetrics.maxSpendingAllowance).toBe(4000);
+    expect(result.current.calculatorMetrics.dailySpendingAllowance).toBeCloseTo(4000 / 30);
+  });
 });

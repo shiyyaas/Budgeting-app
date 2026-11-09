@@ -78,7 +78,7 @@ export const QuickStats: React.FC = () => {
       <Card variant="lavender" className="flex flex-col justify-between">
         <div className="flex items-center justify-between text-charcoal">
           <span className="text-[12px] font-semibold uppercase tracking-wider text-slate">
-            Savings Ratio
+            Savings Rate Achieved
           </span>
           <div className="w-8 h-8 rounded-md bg-white/70 flex items-center justify-center text-brand-purple shadow-xs">
             <PiggyBank className="w-4 h-4" />
@@ -89,7 +89,7 @@ export const QuickStats: React.FC = () => {
             {summaryStats.savingsRate}%
           </div>
           <p className="text-[12px] text-slate mt-1">
-            Target savings guideline: 20%+
+            Target savings goal: 20%+
           </p>
         </div>
       </Card>

@@ -44,6 +44,28 @@ export interface FilterState {
   sortBy: 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
 }
 
+export type BudgetTimeframe = 'monthly' | 'weekly';
+
+export interface BudgetCalculatorConfig {
+  incomeLimit: number;
+  timeframe: BudgetTimeframe;
+  savingsTargetRate: number; // percentage 0-100
+}
+
+export interface BudgetCalculatorMetrics {
+  incomeLimit: number;
+  timeframe: BudgetTimeframe;
+  savingsTargetRate: number;
+  targetSavingsAmount: number;
+  maxSpendingAllowance: number;
+  dailySpendingAllowance: number;
+  weeklySpendingAllowance: number;
+  currentExpenses: number;
+  remainingSafeSpend: number;
+  isOverSpendingAllowance: boolean;
+  actualSavingsSurplus: number;
+}
+
 export interface SummaryStats {
   totalIncome: number;
   totalExpenses: number;
